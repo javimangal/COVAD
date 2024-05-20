@@ -1,0 +1,193 @@
+---
+title: "Estudios publicados pro el grupo COVAD"
+author: "Javier Mancilla Galindo"
+date: "`r Sys.Date()`"
+execute: 
+  echo: false
+  warning: false
+format:
+  pdf:
+    documentclass: scrartcl
+editor: source
+---
+
+```{r}
+
+if (!require("pacman", quietly = TRUE)) {
+  install.packages("pacman")
+}
+
+pacman::p_load(
+  tidyverse,
+  rvest,
+  tm,
+  gt,
+  report
+)
+
+```
+
+```{r}
+data <-  read.csv("csv-COVADStudy-set.csv")
+```
+
+Los siguientes estudios serán excluidos debido a que uno es una editorial, otro es una corrección y los últimos 2 no son estudios relacionados al consorcio COVAD.     
+```{r}
+data %>% select(PMID, Title) %>%
+  filter(PMID %in% c("37807616", "37750762", "35873879", "33759112")) %>% 
+  gt
+```
+
+```{r}
+COVAD <- data %>% 
+  filter(!PMID %in% c("37807616", "37750762", "35873879", "33759112"))
+```
+
+Se incluyeron un total de `r count(COVAD)` estudios para el análisis. 
+
+# Revistas  
+
+```{r}
+#| include: false
+tabla_revistas <- COVAD %>% 
+  group_by(Journal.Book) %>% 
+  summarize( n = n() ) %>% 
+  mutate( 
+    Porcentaje = round((n/sum(n) * 100),2) 
+    ) %>%
+  rename(Revista = Journal.Book) %>% 
+  arrange(desc(n)) 
+
+
+write.csv(tabla_revistas, file = "revistas.csv")
+
+tabla_revistas <- tabla_revistas %>%  gt
+
+gtsave(tabla_revistas, filename = "tabla_revistas.png")
+```
+
+```{r}
+tabla_revistas
+```
+
+
+# Autores  
+
+```{r}
+autores <- COVAD %>% 
+  separate_rows(Authors, sep = ", ") %>% 
+  separate_rows(Authors, sep = "; ") %>% 
+  group_by(Authors) %>% 
+  summarize( n = n() ) %>%
+  rename(Autores = Authors) %>% 
+  mutate(Apellido = str_extract(Autores, "^[^ ]+")) %>% 
+  arrange(Autores)
+```
+
+Hay un total de `r count(autores)`. Algunos de ellos pueden estar repetidos debido a registros distintos del nombre en cada artículo. Asimismo, autores con el mismo nombre podrían ser contados como duplicados si se intentaran obtener estadísticas de resumen.  
+
+```{r}
+write.csv(autores, file = "autores.csv")
+```
+
+
+# Miembros de oficina editorial 
+
+```{r}
+#| include: false
+source("mesas_editoriales.R")
+```
+
+### Rheumatology
+```{r}
+Rheumatology_tabla
+```
+
+\pagebreak
+
+### Rheumatology International   
+```{r}
+Rheumatology_Int_tabla
+```
+
+\pagebreak
+
+### Int J Rheum Dis
+
+```{r}
+Int_J_Rheum_Dis_tabla
+```
+
+\pagebreak
+
+### Autoimmun Rev
+
+```{r}
+Autoimmun_Rev_tabla
+```
+
+\pagebreak
+
+### Front Immunol
+
+```{r}
+Front_Immunol_tabla
+```
+
+Checar manualmente al final esta página de Frontiers in Immunology 
+
+\pagebreak
+
+### J Clin Immunol
+
+```{r}
+J_Clin_Immunol_tabla
+```
+
+\pagebreak
+
+### J Clin Med
+
+```{r}
+J_Clin_Med_tabla
+```
+
+\pagebreak
+
+### J Diabetes Investig
+
+```{r}
+J_Diabetes_Investig_tabla
+```
+
+\pagebreak
+
+### Lancet Rheumatol
+
+```{r}
+Lancet_Rheumatol_tabla
+```
+
+\pagebreak
+
+### Mod Rheumatol
+
+```{r}
+Mod_Rheumatol_tabla
+```
+
+\pagebreak
+
+### Muscle Nerve
+
+```{r}
+Muscle_Nerve_tabla
+```
+
+\pagebreak
+
+### Rheumatol Adv Pract
+
+```{r}
+Rheumatol_Adv_Pract_tabla
+```
