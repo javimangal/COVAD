@@ -86,7 +86,7 @@ Los siguientes autores del consorcio COVAD tenían al menos una posición editor
 |-----------------|
 | Masataka Kuwana |
 
-### Rheumatology International
+### Rheumatol Adv Pract 
 
 | Editorial Board Member |
 |------------------------|
