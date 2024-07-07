@@ -1,5 +1,5 @@
 ---
-title: "Estudios publicados pro el grupo COVAD"
+title: "Estudios publicados por el grupo COVAD"
 author: "Javier Mancilla Galindo"
 date: "`r Sys.Date()`"
 execute: 
@@ -27,15 +27,26 @@ pacman::p_load(
 
 ```
 
+Se realizó una [búsqueda por medio de PubMed](https://pubmed.ncbi.nlm.nih.gov/?term=COVAD+Study+Group%5BCorporate+Author%5D+OR+COVAD&filter=years.2020-2024&sort=date) el día 20/05/2024, con la cadena de búsqueda *COVAD Study Group[Corporate Author] OR COVAD*, limitado al periodo de 2020 a 2024. Se obtuvieron **41 resultados**, 
+
 ```{r}
+#| echo: true 
 data <-  read.csv("csv-COVADStudy-set.csv")
 ```
 
-Los siguientes estudios serán excluidos debido a que uno es una editorial, otro es una corrección y los últimos 2 no son estudios relacionados al consorcio COVAD.     
+Los siguientes estudios serán excluidos debido a que uno es una editorial, otro es una corrección y los últimos 2 no son estudios relacionados al consorcio COVAD.
+
 ```{r}
 data %>% select(PMID, Title) %>%
   filter(PMID %in% c("37807616", "37750762", "35873879", "33759112")) %>% 
-  gt
+  gt %>% 
+  cols_width(
+    PMID ~ pct(15),
+    Title ~ pct(85)
+  ) %>%
+  tab_options(
+    table.width = pct(100)
+  )
 ```
 
 ```{r}
@@ -43,9 +54,11 @@ COVAD <- data %>%
   filter(!PMID %in% c("37807616", "37750762", "35873879", "33759112"))
 ```
 
-Se incluyeron un total de `r count(COVAD)` estudios para el análisis. 
+Se incluyeron un total de `r count(COVAD)` estudios para el análisis.
 
-# Revistas  
+\pagebreak
+
+# Revistas
 
 ```{r}
 #| include: false
@@ -53,25 +66,44 @@ tabla_revistas <- COVAD %>%
   group_by(Journal.Book) %>% 
   summarize( n = n() ) %>% 
   mutate( 
-    Porcentaje = round((n/sum(n) * 100),2) 
+    Porcentaje = round((n/sum(n) * 100),1) 
     ) %>%
   rename(Revista = Journal.Book) %>% 
-  arrange(desc(n)) 
-
+  arrange(desc(n))
 
 write.csv(tabla_revistas, file = "revistas.csv")
 
-tabla_revistas <- tabla_revistas %>%  gt
+gtsave(tabla_revistas %>% gt, filename = "tabla_revistas.png")
 
-gtsave(tabla_revistas, filename = "tabla_revistas.png")
+tabla_revistas %>% gt
 ```
+
+¿Qué tan probable es que esta distribución sea debida al azar?
+
+La frecuencia esperada por revista es:
 
 ```{r}
-tabla_revistas
+tabla_revistas %>% 
+  summarize(
+    Frecuencia_esperada = round(sum(n)/nlevels(factor(Revista)))
+    ) %>% gt
 ```
 
+Prueba de chi cuadrada con corrección de continuidad
 
-# Autores  
+```{r}
+chisq.test(tabla_revistas$n)
+```
+
+Corroboración con simulación de Monte Carlo debido a frecuencia esperada media menor a 5:
+
+```{r}
+chisq.test(tabla_revistas$n, simulate.p.value = TRUE)
+```
+
+\pagebreak
+
+# Autores
 
 ```{r}
 autores <- COVAD %>% 
@@ -84,28 +116,108 @@ autores <- COVAD %>%
   arrange(Autores)
 ```
 
-Hay un total de `r count(autores)`. Algunos de ellos pueden estar repetidos debido a registros distintos del nombre en cada artículo. Asimismo, autores con el mismo nombre podrían ser contados como duplicados si se intentaran obtener estadísticas de resumen.  
+Hay un total de `r count(autores)`. Algunos de ellos pueden estar repetidos debido a registros distintos del nombre en cada artículo. Asimismo, autores con el mismo nombre podrían ser contados como duplicados si se intentaran obtener estadísticas de resumen.
 
 ```{r}
+#| echo: true
 write.csv(autores, file = "autores.csv")
 ```
 
+# Miembros de oficina editorial
 
-# Miembros de oficina editorial 
+Se utilizó el siguiente script para encontrar coincidencias entre los nombres de los miembros del consorcio COVAD y los nombres públicamente disponibles en los sitios web de las revistas, los cuales han sido respaldados en la carpeta [**editores**](https://github.com/javimangal/COVAD/tree/main/editores). El copyright de los sitios documentos html pertenece a cada una de las revistas. En caso de solicitud explícita de las revistas, retiraré inmediatamente los documentos html de este repositorio.
 
 ```{r}
-#| include: false
+#| echo: true
 source("mesas_editoriales.R")
 ```
 
+Se encontró que los miembros del consorcio COVAD tienen las siguientes posiciones editoriales:
+
+### Rheumatology Oxford
+
+| Associate Editor | Editorial Board         | Digital and Social Media Committee |
+|-------------------|-----------------------------------|-------------------|
+| Rohit Aggarwal   | Nicola Dalbeth          | Mrinalini Dey                      |
+| Hector Chinoy    | Sakir Ahmed             | Latika Gupta                       |
+| Elena Nikiphorou | Mrinalini Dey           | Elena Nikiphorou                   |
+|                  | Dzifa Dey               | Cristiana Sieiro Santos            |
+|                  | Shuayb Elkhalifa        | Chris Wincup                       |
+|                  | Cristiana Sieiro Santos |                                    |
+|                  | Chris Wincup            |                                    |
+
+\pagebreak
+
+## Rheumatology International
+
+| Editor-in-chief      | Associate Editors | Editorial Board     |
+|----------------------|-------------------|---------------------|
+| Armen Yuri Gasparyan | Sakir Ahmed       | Döndü Üsküdar Cansu |
+|                      | Doskaliuk Bohdana | Tamer Gheita        |
+|                      |                   | Tsvetelina Velikova |
+|                      |                   | Nelly Ziade         |
+
+## Int J Rheum Dis
+
+| Associate Editor  |
+|-------------------|
+| Tamer Gheita      |
+| Latika Gupta      |
+| Aman Sharma       |
+| Padmanabha Shenoy |
+
+## Autoimmun Rev
+
+| Editorial Board Member |
+|------------------------|
+| Maria Giovanna Danieli |
+
+## J Clin Med
+
+| Editorial Board Member |
+|------------------------|
+| Marco Sebastiani       |
+
+\pagebreak
+
+## Lancet Rheumatol
+
+| Editorial Board Member |
+|------------------------|
+| Nicola Dalbeth         |
+| Oliver Distler         |
+
+## Mod Rheumatol 
+
+| Editor-in-chief |
+|-----------------|
+| Masataka Kuwana |
+
+## Rheumatol Adv Pract 
+
+| Editorial Board Member |
+|------------------------|
+| Bohdana Doskaliuk      |
+| Kunal Chandwar         |
+| Sarah Dyball           |
+| Latika Gupta           |
+| Vincenzo Venerito      |
+| Chris Wincup           |
+
+\pagebreak
+
+# Apéndice: Resultados de pareamiento de revistas
+
 ### Rheumatology
+
 ```{r}
 Rheumatology_tabla
 ```
 
 \pagebreak
 
-### Rheumatology International   
+### Rheumatology International
+
 ```{r}
 Rheumatology_Int_tabla
 ```
@@ -134,7 +246,7 @@ Autoimmun_Rev_tabla
 Front_Immunol_tabla
 ```
 
-Checar manualmente al final esta página de Frontiers in Immunology 
+Para la revista Frontiers in Immunology, no fue posible hacer el pareamiento debido a que la página web no permite la extracción directa de los nombres.
 
 \pagebreak
 
@@ -191,3 +303,30 @@ Muscle_Nerve_tabla
 ```{r}
 Rheumatol_Adv_Pract_tabla
 ```
+
+\pagebreak
+
+# Referencias de paquetes de R usados
+
+```{r}
+#| include: false
+report::cite_packages(sessionInfo())
+```
+
+  - Feinerer I, Hornik K (2024). _tm: Text Mining Package_. R package version 0.7-13, <https://CRAN.R-project.org/package=tm>. Feinerer I, Hornik K, Meyer D (2008). “Text Mining Infrastructure in R.” _Journal of Statistical Software_, *25*(5), 1-54. doi:10.18637/jss.v025.i05 <https://doi.org/10.18637/jss.v025.i05>.
+  - Grolemund G, Wickham H (2011). “Dates and Times Made Easy with lubridate.” _Journal of Statistical Software_, *40*(3), 1-25. <https://www.jstatsoft.org/v40/i03/>.
+  - Hornik K (2020). _NLP: Natural Language Processing Infrastructure_. R package version 0.2-1, <https://CRAN.R-project.org/package=NLP>.
+  - Iannone R, Cheng J, Schloerke B, Hughes E, Lauer A, Seo J (2024). _gt: Easily Create Presentation-Ready Display Tables_. R package version 0.10.1, <https://CRAN.R-project.org/package=gt>.
+  - Makowski D, Lüdecke D, Patil I, Thériault R, Ben-Shachar M, Wiernik B (2023). “Automated Results Reporting as a Practical Tool to Improve Reproducibility and Methodological Best Practices Adoption.” _CRAN_. <https://easystats.github.io/report/>.
+  - Müller K, Wickham H (2023). _tibble: Simple Data Frames_. R package version 3.2.1, <https://CRAN.R-project.org/package=tibble>.
+  - R Core Team (2024). _R: A Language and Environment for Statistical Computing_. R Foundation for Statistical Computing, Vienna, Austria. <https://www.R-project.org/>.
+  - Rinker TW, Kurkiewicz D (2018). _pacman: Package Management for R_. version 0.5.0, <http://github.com/trinker/pacman>.
+  - Wickham H (2016). _ggplot2: Elegant Graphics for Data Analysis_. Springer-Verlag New York. ISBN 978-3-319-24277-4, <https://ggplot2.tidyverse.org>.
+  - Wickham H (2023). _forcats: Tools for Working with Categorical Variables (Factors)_. R package version 1.0.0, <https://CRAN.R-project.org/package=forcats>.
+  - Wickham H (2023). _stringr: Simple, Consistent Wrappers for Common String Operations_. R package version 1.5.1, <https://CRAN.R-project.org/package=stringr>.
+  - Wickham H (2024). _rvest: Easily Harvest (Scrape) Web Pages_. R package version 1.0.4, <https://CRAN.R-project.org/package=rvest>.
+  - Wickham H, Averick M, Bryan J, Chang W, McGowan LD, François R, Grolemund G, Hayes A, Henry L, Hester J, Kuhn M, Pedersen TL, Miller E, Bache SM, Müller K, Ooms J, Robinson D, Seidel DP, Spinu V, Takahashi K, Vaughan D, Wilke C, Woo K, Yutani H (2019). “Welcome to the tidyverse.” _Journal of Open Source Software_, *4*(43), 1686. doi:10.21105/joss.01686 <https://doi.org/10.21105/joss.01686>.
+  - Wickham H, François R, Henry L, Müller K, Vaughan D (2023). _dplyr: A Grammar of Data Manipulation_. R package version 1.1.4, <https://CRAN.R-project.org/package=dplyr>.
+  - Wickham H, Henry L (2023). _purrr: Functional Programming Tools_. R package version 1.0.2, <https://CRAN.R-project.org/package=purrr>.
+  - Wickham H, Hester J, Bryan J (2024). _readr: Read Rectangular Text Data_. R package version 2.1.5, <https://CRAN.R-project.org/package=readr>.
+  - Wickham H, Vaughan D, Girlich M (2024). _tidyr: Tidy Messy Data_. R package version 1.3.1, <https://CRAN.R-project.org/package=tidyr>.
