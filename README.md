@@ -4,7 +4,7 @@ Este repositorio contiene la descripción de un análisis realizada sobre los es
 
 # Métodos
 
-La documentación subyacente a estos resultados puede ser consultada en el documento [**COVAD.pdf**](/COVAD.pdf) y el código subyacente para reproducir los resultados se encuentra en el documento [**COVAD.qmd**](/COVAD.qmd), donde se hace mención a la localización de los datos en este repositorio y scripts adicionales empleados.
+La documentación subyacente a estos resultados puede ser consultada en el documento [**COVAD.pdf**](/COVAD.pdf) y el código para reproducir los resultados se encuentra en el documento [**COVAD.qmd**](/COVAD.qmd), donde se hace mención a la localización de los datos en este repositorio y scripts adicionales empleados.
 
 En breve, se realizó una [búsqueda por medio de PubMed](https://pubmed.ncbi.nlm.nih.gov/?term=COVAD+Study+Group%5BCorporate+Author%5D+OR+COVAD&filter=years.2020-2024&sort=date) el día 20/05/2024, con la cadena de búsqueda *COVAD Study Group[Corporate Author] OR COVAD*, limitado al periodo de 2020 a 2024. Se obtuvieron **41 resultados**, de los cuales fueron excluidos los estudios con PMID 37807616, 37750762, 35873879 y 33759112 debido a que el primero corresponde a una editorial, el segundo a una corrección y los útlimos 2 no están relacionados al consorcio COVAD, por lo que fueron incluidos un total de **37 estudios** para el análisis.
 
@@ -27,7 +27,7 @@ En un total de **37 estudios** publicados por el autores miembros del consorcio 
 | Muscle Nerve          |   1 |            2.7 |
 | Rheumatol Adv Pract   |   1 |            2.7 |
 
-Suponiendo que la decisión de publicar en una u otra de estas 12 revistas identificadas hubiera sido debido al azar, la frecuencia promedio esperada de artículos por revista habría sido **3 artículos por revista**. Sin embargo, hubo una mayor predilección a publicar en ciertas revistas, con un patrón que no puede ser explicado por el azar (**p \< 0.0001**)
+Suponiendo que la decisión de publicar en una u otra de estas 12 revistas identificadas hubiera sido debido al azar, la frecuencia promedio esperada de artículos por revista habría sido **3 artículos por revista**. Sin embargo, hubo una mayor predilección a publicar en ciertas revistas, con un patrón que no puede ser explicado por el azar (**p \< 0.001**)
 
 Los siguientes autores del consorcio COVAD tenían al menos una posición editorial en las revistas donde han sido publicados los artículos del consorcio COVAD:
 
